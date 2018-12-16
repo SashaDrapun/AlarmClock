@@ -60,7 +60,7 @@ end;
 
 procedure TForm2.Button1Click(Sender: TObject);
 var arrayDateTime: abc;
-c:char;
+c:char ;
 i:integer;
 begin
 c:=':';
