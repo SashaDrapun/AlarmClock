@@ -171,7 +171,7 @@ unit5.Form5.DisplayAlarms;
     s:='';
  form1.Close;
      end
-     else showmessage('Заполните все поля');
+     else showmessage('Заполните все поля!');
 end;
 
 procedure TForm1.Image6Click(Sender: TObject);
