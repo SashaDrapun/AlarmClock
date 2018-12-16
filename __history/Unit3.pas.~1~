@@ -1,0 +1,144 @@
+unit Unit3;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.MPlayer, unit5,
+  Vcl.ExtCtrls;
+
+type
+  TForm3 = class(TForm)
+    Label1: TLabel;
+    MediaPlayer1: TMediaPlayer;
+    Label2: TLabel;
+    Label4: TLabel;
+    ComboBox1: TComboBox;
+    Button1: TButton;
+    Button2: TButton;
+    Image1: TImage;
+    Edit1: TEdit;
+    Label3: TLabel;
+    procedure FormActivate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+  abc =  array of string;
+var
+  Form3: TForm3;
+  random1:integer;
+  answer: string;
+implementation
+
+{$R *.dfm}
+
+function Split(s: string; a: char): abc;
+var i:integer;
+index:integer;
+result1: abc;
+begin
+SetLength(result1,1);
+index:=0;
+
+for i := 1 to s.Length do
+  begin
+
+    if s[i]=a then
+    begin
+    inc(index);
+    SetLength(result1,index+1);
+    continue;
+    end;
+
+    result1[index] := result1[index]+s[i];
+  end;
+  result :=result1;
+
+end;
+
+procedure TForm3.Button1Click(Sender: TObject);
+var arrayDateTime: abc;
+c:char;
+i:integer;
+begin
+if edit1.Text=answer then
+begin
+
+c:=':';
+arrayDateTime:= Split(TimeTostr(ArrayOfClocks[CallerID].MyTime),c);
+arrayDateTime[1]:= inttostr(strtoint(arrayDateTime[1])+strtoint(Combobox1.Text));
+if strtoint(arrayDateTime[1])>59 then
+begin
+ arrayDateTime[0]:= inttostr((strtoint(arrayDateTime[1])+1));
+ arrayDateTime[1]:= inttostr(strtoint(arrayDateTime[2])-60);
+end;
+if strtoint(arrayDateTime[0])>23 then
+begin
+ arrayDateTime[0]:= inttostr((strtoint(arrayDateTime[0])+1));
+ arrayDateTime[0]:= inttostr(0);
+end;
+answer:='';
+ArrayOfClocks[CallerID].MyTime:= strtotime(arrayDateTime[0]+':'+arrayDateTime[1]+':'+'0');
+unit5.Form5.DisplayAlarms;
+MediaPlayer1.Close;
+form3.Close;
+end
+else showmessage('Неверный ответ');
+end;
+
+procedure TForm3.Button2Click(Sender: TObject);
+begin
+if edit1.Text=answer then
+begin
+answer:='';
+MediaPlayer1.Close;
+form3.Close;
+end
+else showmessage('Неверный ответ');
+end;
+
+procedure SetAnswer;
+var f1:text;
+i:integer;
+a:string;
+begin
+assignfile(f1,'C:\Users\Sasha\Desktop\Будильник\Win32\Debug\1.txt');
+reset(f1);
+i:=0;
+showmessage(inttostr(random1));
+while not(Eof(f1)) do
+begin
+readln(f1,a);
+inc(i);
+showmessage(a);
+if i=random1 then
+begin
+  answer:=a;
+  closefile(f1);
+  exit;
+end;
+end;
+
+end;
+
+procedure TForm3.FormActivate(Sender: TObject);
+begin
+label2.Caption:= ArrayOfClocks[CallerID].Name;
+label3.Caption:=Timetostr(ArrayOfClocks[CallerID].MyTime);
+MediaPlayer1.FileName:=ArrayOfClocks[CallerID].Signal;
+randomize;
+random1:= random(51);
+Image1.Picture.LoadFromFile('C:\Users\Sasha\Desktop\Будильник\Win32\Debug\'+inttostr(random1)+'.png');
+MediaPlayer1.Open;
+Mediaplayer1.Play;
+SetAnswer;
+
+end;
+
+
+
+end.

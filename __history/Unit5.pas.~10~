@@ -1,0 +1,329 @@
+unit Unit5;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  Vcl.Imaging.pngimage,DateUtils, Vcl.MPlayer, Vcl.ExtCtrls;
+
+type
+  TForm5 = class(TForm)
+    Image1: TImage;
+    Image2: TImage;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    CheckBox4: TCheckBox;
+    CheckBox5: TCheckBox;
+    MediaPlayer1: TMediaPlayer;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Label10: TLabel;
+    Image3: TImage;
+    Image4: TImage;
+    Image5: TImage;
+    Image6: TImage;
+    Image7: TImage;
+    procedure Image1Click(Sender: TObject);
+    procedure Image2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure DisplayAlarms;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+  TAlarmClock = record
+    Name: string[50];
+    MyTime: TDateTime;
+    Signal : string[250];
+    SetAcideFor : integer;
+    IsItOn: boolean;
+  end;
+
+var
+  Form5: TForm5;
+  Bin: boolean;
+  Cross: boolean;
+  Plus: boolean;
+  MyMenu: boolean;
+  ArrayOfClocks: array of TAlarmClock;
+  CountofClocks:integer;
+  f1: file of TAlarmClock;
+implementation
+   uses unit1;
+{$R *.dfm}
+
+procedure TForm5.FormCreate(Sender: TObject);
+begin
+CountofClocks:=0;
+Plus:= true;
+Bin:= false;
+Cross:= false;
+MyMenu:=true;
+end;
+
+procedure ClearLabels;
+begin
+Form5.label1.Caption:='';
+Form5.label2.Caption:='';
+Form5.label3.Caption:='';
+Form5.label4.Caption:='';
+Form5.label5.Caption:='';
+Form5.label6.Caption:='';
+Form5.label7.Caption:='';
+Form5.label8.Caption:='';
+Form5.label9.Caption:='';
+Form5.label10.Caption:='';
+end;
+
+procedure HideCheckboxes;
+begin
+  form5.CheckBox1.Visible:=false;
+  form5.CheckBox2.Visible:=false;
+  form5.CheckBox3.Visible:=false;
+  form5.CheckBox4.Visible:=false;
+  form5.CheckBox5.Visible:=false;
+end;
+
+procedure HideImages;
+begin
+  form5.Image3.Visible:=false;
+  form5.Image4.Visible:=false;
+  form5.Image5.Visible:=false;
+  form5.Image6.Visible:=false;
+  form5.Image7.Visible:=false;
+end;
+
+
+procedure DeselectingCheckBoxes;
+begin
+  form5.CheckBox1.Checked:=false;
+  form5.CheckBox2.Checked:=false;
+  form5.CheckBox3.Checked:=false;
+  form5.CheckBox4.Checked:=false;
+  form5.CheckBox5.Checked:=false;
+end;
+
+procedure TForm5.DisplayAlarms;
+var i,j:integer;
+begin
+
+ClearLabels;
+Form5;
+HideImages;
+DeselectingCheckBoxes;
+
+  for i := 0 to CountofClocks-1 do
+  begin
+    for j := 0 to Form5.ComponentCount-1 do
+    begin
+      if (Form5.Components[j] is TLabel) then  // если label
+       begin
+         if (Form5.Components[j].Tag) = strtoint((inttostr(i)+'1')) then
+         begin
+           (Form5.Components[j] as TLabel).Caption:=ArrayOfClocks[i].Name;
+           (Form5.Components[j] as TLabel).Visible:=true;
+         end;
+           if (Form5.Components[j].Tag) = strtoint((inttostr(i)+'2')) then
+         begin
+           (Form5.Components[j] as TLabel).Caption:=TimeTostr(ArrayOfClocks[i].MyTime);
+           (Form5.Components[j] as TLabel).Visible:=true;
+         end;
+       end;
+
+
+       if (Form5.Components[j] is TImage) then     // если image
+       begin
+         if (Form5.Components[j].Tag) = j then
+         begin
+         (Form5.Components[j] as TImage).Visible:=true;
+           if ArrayOfClocks[i].IsItOn then
+           begin
+             (Form5.Components[j] as TImage).Picture.LoadFromFile('On.png');
+           end
+           else
+           (Form5.Components[j] as TImage).Picture.LoadFromFile('Off.png');
+         end;
+
+       end;
+    end;
+  end;
+
+end;
+
+procedure Save;
+Var a:TAlarmClock; i:integer;
+begin
+ rewrite(f1);
+ for I := 0 to CountofClocks-1 do
+  begin
+ seek(f1,filesize(f1));
+ a.Name:=ArrayOfClocks[i].Name;
+ a.MyTime:=ArrayOfClocks[i].MyTime;
+ a.Signal:=ArrayOfClocks[i].Signal;
+ a.SetAcideFor:=ArrayOfClocks[i].SetAcideFor;
+ write(f1,a);
+  end;
+ closefile(f1);
+end;
+
+
+
+
+procedure PlusClick;
+begin
+  if CountofClocks=5 then
+begin
+  showmessage('Достигнут лимит будильников, удалите чтобы добавить');
+  exit;
+end;
+form1.ShowModal;
+exit;
+end;
+
+procedure BinClick ;
+var BoolMas: array of boolean;
+countOfTrue: integer;
+i,j: integer;
+index: integer;
+a: TAlarmClock;
+begin
+countOfTrue:=0;
+  Plus:=true;
+  Bin:=false;
+  form5.image1.Picture.LoadFromFile('Черный плюс.png');
+  form5.image2.Picture.LoadFromFile('clipboard.png');
+  MyMenu:=true;
+  Cross:=false;
+
+  setlength(BoolMas,CountofClocks);
+  index:=0;
+
+  for i := 0 to Form5.ComponentCount-1 do
+      begin
+       if (Form5.Components[i] is TCheckBox) then
+       begin
+        if (Form5.Components[i] as TCheckBox).Checked=true
+        then
+        BoolMas[index] := false
+        else
+        BoolMas[index] := true;
+        inc(index);
+       if index>CountofClocks then break;
+
+      end;
+        end;
+
+       for i := 0 to CountofClocks-1 do
+          begin
+            if BoolMas[i]=false then
+            begin
+              for j := i to CountofClocks-1  do
+             if BoolMas[j] = true then
+                begin
+                 BoolMas[i]:=false;
+                 a:=ArrayOfClocks[i];
+                 ArrayOfClocks[i]:=ArrayOfClocks[j];
+                 ArrayOfClocks[j]:=a;
+                 BoolMas[j]:=true;
+                 break;
+                end;
+
+            end;
+          end;
+
+ for i := 0 to CountofClocks-1  do
+        begin
+          if BoolMas[i] =  true then
+           inc(countOfTrue);
+          end;
+
+SetLength(ArrayOfClocks,countOfTrue);
+SetLength(BoolMas,countOfTrue);
+
+
+
+CountofClocks:=countOfTrue;
+Showmessage(inttostr(CountofClocks));
+
+DisplayAlarms;
+end;
+
+
+procedure TForm5.Image1Click(Sender: TObject);
+begin
+if Plus then
+begin
+  PlusClick;
+end;
+
+if Bin then
+begin
+BinClick;
+end;
+
+end;
+
+
+
+
+
+procedure TForm5.Image2Click(Sender: TObject);
+var i:integer;
+begin
+if CountofClocks=0 then
+begin
+  showmessage('Вначале добавьте будильник');
+  exit;
+end;
+
+if MYMenu then
+ begin
+image2.Picture.LoadFromFile('крест.png');
+image1.Picture.LoadFromFile('bin.png');
+MYMenu:=false;
+Plus:=false;
+Bin:=true;
+Cross:=true;
+
+for i := 0 to form5.ComponentCount-1 do
+    begin
+      if (form5.Components[i] is TCheckBox) then
+      begin
+       if ((form5.Components[i] as TCheckBox).Tag <= CountofClocks)
+       then
+       (form5.Components[i] as TCheckBox).Visible:=true;
+      end;
+    end;
+exit;
+ end;
+ if Cross then
+ begin
+  image1.Picture.LoadFromFile('Черный плюс.png');
+  image2.Picture.LoadFromFile('clipboard.png');
+  Bin:=false;
+  Cross:=false;
+  Plus:=true;
+  MyMenu:=true;
+  for i := 0 to form5.ComponentCount-1 do
+    begin
+      if (form5.Components[i] is TCheckBox) then
+      begin
+       (form5.Components[i] as TCheckBox).Visible:=false;
+      end;
+    end;
+  exit;
+ end;
+end;
+
+end.
