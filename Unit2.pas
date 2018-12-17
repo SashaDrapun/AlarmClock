@@ -15,7 +15,7 @@ abc =  array of string;
     MediaPlayer1: TMediaPlayer;
     ComboBox1: TComboBox;
     Label4: TLabel;
-    Button1: TButton;
+    Button1: TButton; 
     Button2: TButton;
     procedure FormActivate(Sender: TObject);
     procedure Button2Click(Sender: TObject);
